@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  margin: 0 auto;
+  max-width: 800px;
+  padding: 0 20px;
+  overflow:hidden
+}
+
+.container {
+  border: 2px solid #dedede;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.darker {
+  border-color: #ccc;
+  background-color: #ddd;
+}
+
+.container::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.container img {
+  float: left;
+  max-width: 60px;
+  width: 100%;
+  margin-right: 20px;
+  border-radius: 50%;
+}
+
+.container img.right {
+  float: right;
+  margin-left: 20px;
+  margin-right:0;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    max-width: 800px;
+    padding: 0 20px;
+    background: grey;
+}
+#chatArea {
+    overflow-y: auto;
+    position: fixed;
+    width: 840px;
+    top: 67.80px;
+    bottom: 56px;
+}
+</style>
+</head>
+<body style="background-image: url('background.jpg');">
+
+ <header style="position: fixed;background-color:grey;padding: 0 20px;width: 800px;font-family: 'Comic Sans MS', cursive, sans-serif;"><h2>Conceirge Service</h2>
+ </header>
+
+<div id="chatArea" style="background-color:grey;">
+    <!-- <div class="container">
+        <img src="bot_face.png" alt="ChatBot" style="width:100%;">
+        <p>Hello. How can I help you today?</p>
+      </div> -->
+      
+      <!-- <div class="container darker">
+        <img src="user_face.png" alt="User" class="right" style="width:100%;">
+        <p>I'm looking for a restraunt</p>
+      </div> -->
+      
+      <!-- <div class="container">
+        <img src="bot_face.png" alt="ChatBot" style="width:100%;">
+        <p>Sweet! So, what do you wanna do today?</p>
+      </div> -->
+      
+</div>
+<footer class="footer">
+    <form>
+        <label for="chat" style="font-family: 'Comic Sans MS', cursive, sans-serif;">Type Here:</label>
+        <input type="text" id="chat" name="chat" size="150"><br>
+        <input type="button" id="submit" value="submit" onclick="submitChat()">
+        <br>
+    </form>
+</footer>
+</body>
+<script type="text/javascript" src="lib/axios/dist/axios.standalone.js"></script>
+<script type="text/javascript" src="lib/CryptoJS/rollups/hmac-sha256.js"></script>
+<script type="text/javascript" src="lib/CryptoJS/rollups/sha256.js"></script>
+<script type="text/javascript" src="lib/CryptoJS/components/hmac.js"></script>
+<script type="text/javascript" src="lib/CryptoJS/components/enc-base64.js"></script>
+<script type="text/javascript" src="lib/url-template/url-template.js"></script>
+<script type="text/javascript" src="lib/apiGatewayCore/sigV4Client.js"></script>
+<script type="text/javascript" src="lib/apiGatewayCore/apiGatewayClient.js"></script>
+<script type="text/javascript" src="lib/apiGatewayCore/simpleHttpClient.js"></script>
+<script type="text/javascript" src="lib/apiGatewayCore/utils.js"></script>
+<script type="text/javascript" src="apigClient.js"></script>
+<script>
+    function submitChat(e) {
+            var chatIP = document.getElementById('chat').value;
+            var userbox = document.createElement("DIV");
+            userbox.classList.add("container");
+            userbox.classList.add("darker");
+            var userImg = document.createElement("IMG");
+            userImg.src = "user_face.jpg";
+            userImg.alt = "User";
+            userImg.classList.add("right") ;
+            userImg.style.width = "100%"
+            var para = document.createElement("P");                       // Create a <p> element
+            var t = document.createTextNode(chatIP);      // Create a text node
+            para.appendChild(t);
+            userbox.appendChild(userImg);
+            userbox.appendChild(para);
+            chatArea = document.getElementById("chatArea");
+            chatArea.insertBefore(userbox,chatArea.childNodes[0]);
+
+            //clear chat box
+            var chat = document.getElementById('chat');
+            chat.value = "";
+
+            var params = {
+              headers: {
+                param0: 'Accept:application/json',
+              }
+            };
+
+            var body = JSON.stringify({"message": chatIP, "userId": "101010"});
+
+            var botResponse = ""
+
+            var apigClient = apigClientFactory.newClient();
+            apigClient.chatbotPost(params, body)
+            .then(function(result){
+              console.log(result['data']['body']);
+              json = JSON.parse(JSON.stringify(result))
+              // alert('Passed')
+              console.log(json)
+              botResponse = result['data']['body']
+              var userbox = document.createElement("DIV");
+              userbox.classList.add("container");
+              var userImg = document.createElement("IMG");
+              userImg.src = "bot_face.png";
+              userImg.alt = "ChatBot";
+              userImg.style.width = "100%"
+              var para = document.createElement("P");                       // Create a <p> element
+              var t = document.createTextNode(botResponse);      // Create a text node
+              para.appendChild(t);
+              userbox.appendChild(userImg);
+              userbox.appendChild(para);
+              chatArea = document.getElementById("chatArea");
+              chatArea.insertBefore(userbox,chatArea.childNodes[0]);
+            }).catch( function(result){
+              console.log(JSON.stringify(result))
+            });
+}
+</script>
+</html>
